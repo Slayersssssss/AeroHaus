@@ -6,20 +6,20 @@ import { ProductPurchasePanel } from "@/components/product-purchase-panel";
 import { ProductCard } from "@/components/product-card";
 import { PageHero } from "@/components/page-hero";
 import { breadcrumbsJsonLd, createMetadata, productJsonLd } from "@/lib/seo";
-import { getProductBySlug, getRelatedProducts } from "@/lib/store";
+import { getStorefrontProductBySlug, getStorefrontRelatedProducts } from "@/lib/storefront-server";
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
-  const product = getProductBySlug(slug);
+  const product = await getStorefrontProductBySlug(slug);
   if (!product) return createMetadata({ title: 'Product Not Found' });
   return createMetadata({ title: product.title, description: product.shortDescription });
 }
 
 export default async function ProductPage(props: { params: Promise<{ slug: string }> }) {
   const { slug } = await props.params;
-  const product = getProductBySlug(slug);
+  const product = await getStorefrontProductBySlug(slug);
   if (!product) notFound();
-  const related = getRelatedProducts(product);
+  const related = await getStorefrontRelatedProducts(product);
 
   return (
     <div>

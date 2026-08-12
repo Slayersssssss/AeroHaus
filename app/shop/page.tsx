@@ -1,10 +1,12 @@
 import { PageHero } from "@/components/page-hero";
 import { ProductCard } from "@/components/product-card";
 import { Select } from "@/components/ui/select";
-import { brands, filterProducts, products, vehicleGenerations } from "@/lib/store";
+import { brands, filterProductList, vehicleGenerations } from "@/lib/store";
+import { getStorefrontProducts } from "@/lib/storefront-server";
 
 export default async function ShopPage(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const searchParams = await props.searchParams;
+  const liveProducts = await getStorefrontProducts();
   const params = {
     brand: typeof searchParams.brand === 'string' ? searchParams.brand : undefined,
     category: typeof searchParams.category === 'string' ? searchParams.category : undefined,
@@ -15,8 +17,8 @@ export default async function ShopPage(props: { searchParams: Promise<Record<str
     search: typeof searchParams.search === 'string' ? searchParams.search : undefined,
     sort: typeof searchParams.sort === 'string' ? searchParams.sort : undefined,
   };
-  const filtered = filterProducts(params);
-  const materials = Array.from(new Set(products.flatMap((product) => product.materialOptions)));
+  const filtered = filterProductList(liveProducts, params);
+  const materials = Array.from(new Set(liveProducts.flatMap((product) => product.materialOptions)));
 
   return (
     <div>
@@ -27,7 +29,7 @@ export default async function ShopPage(props: { searchParams: Promise<Record<str
             <input name="search" defaultValue={params.search} placeholder="Search G80, M340i, carbon lip..." className="h-12 border border-white/10 bg-black/30 px-4 text-sm text-white" />
             <Select name="brand" defaultValue={params.brand}><option value="">Brand</option>{brands.map((brand) => <option key={brand.slug} value={brand.slug}>{brand.name}</option>)}</Select>
             <Select name="generation" defaultValue={params.generation}><option value="">Vehicle</option>{vehicleGenerations.map((generation) => <option key={generation.slug} value={generation.slug}>{generation.modelName} · {generation.name}</option>)}</Select>
-            <Select name="category" defaultValue={params.category}><option value="">Category</option>{Array.from(new Set(products.map((product) => product.categorySlug))).map((category) => <option key={category} value={category}>{category}</option>)}</Select>
+            <Select name="category" defaultValue={params.category}><option value="">Category</option>{Array.from(new Set(liveProducts.map((product) => product.categorySlug))).map((category) => <option key={category} value={category}>{category}</option>)}</Select>
             <Select name="material" defaultValue={params.material}><option value="">Material</option>{materials.map((material) => <option key={material} value={material}>{material}</option>)}</Select>
             <Select name="availability" defaultValue={params.availability}><option value="">Availability</option><option value="in-stock">In Stock</option></Select>
             <Select name="badge" defaultValue={params.badge}><option value="">Badge</option><option value="best seller">Best Seller</option><option value="new">New</option><option value="sale">Sale</option><option value="preorder">Preorder</option></Select>

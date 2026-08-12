@@ -49,8 +49,26 @@ export function searchProducts(query: string) {
   return products.filter((product) => [product.title, product.brandName, product.categoryName, product.compatibilitySummary, ...product.fitments.map((fitment) => fitment.generationSlug)].join(" ").toLowerCase().includes(search));
 }
 
-export function filterProducts(params: { brand?: string; category?: string; generation?: string; badge?: string; material?: string; availability?: string; search?: string; sort?: string; }) {
-  const filtered = searchProducts(params.search || "").filter((product) => {
+export function filterProductList(
+  productList: Product[],
+  params: { brand?: string; category?: string; generation?: string; badge?: string; material?: string; availability?: string; search?: string; sort?: string; }
+) {
+  const search = (params.search || "").trim().toLowerCase();
+  const filtered = productList
+    .filter((product) => {
+      if (!search) return true;
+      return [
+        product.title,
+        product.brandName,
+        product.categoryName,
+        product.compatibilitySummary,
+        ...product.fitments.map((fitment) => fitment.generationSlug),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(search);
+    })
+    .filter((product) => {
     if (params.brand && product.brandSlug !== params.brand) return false;
     if (params.category && product.categorySlug !== params.category) return false;
     if (params.generation && !product.fitments.some((fitment) => fitment.generationSlug === params.generation)) return false;
@@ -72,6 +90,10 @@ export function filterProducts(params: { brand?: string; category?: string; gene
     default:
       return filtered.sort((a, b) => Number(b.featured) - Number(a.featured));
   }
+}
+
+export function filterProducts(params: { brand?: string; category?: string; generation?: string; badge?: string; material?: string; availability?: string; search?: string; sort?: string; }) {
+  return filterProductList(products, params);
 }
 
 export function getTrackableOrder(orderNumber: string, email: string) {
