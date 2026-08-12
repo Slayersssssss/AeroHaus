@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const lineItems = cartItems.map((line: { productSlug: string; variantId: string; quantity: number }) => {
     const product = getProductBySlug(line.productSlug);
     const variant = product?.variants.find((item) => item.id === line.variantId);
-    if (!product || !variant) return null;
+    if (!product || !variant || product.status === "Draft" || product.status === "Archived") return null;
     return {
       price_data: {
         currency: 'usd',

@@ -10,7 +10,7 @@ export default async function ImportHistoryPage() {
   const supabase = createSupabaseAdminClient();
   const { data: imports } = await supabase
     .from("catalog_imports")
-    .select("id, filename, row_count, products_created, products_updated, products_skipped, products_requiring_review, created_at, suppliers(name)")
+    .select("id, filename, row_count, products_created, products_updated, products_skipped, products_requiring_review, created_at, provider, source_url, pages_fetched, products_found, failed_products, error_message, suppliers(name)")
     .order("created_at", { ascending: false });
 
   const supplierName = (value: unknown) =>
@@ -31,7 +31,8 @@ export default async function ImportHistoryPage() {
               <tr>
                 <th className="px-4 py-3">Import Date</th>
                 <th className="px-4 py-3">Supplier</th>
-                <th className="px-4 py-3">Filename</th>
+                <th className="px-4 py-3">Source</th>
+                <th className="px-4 py-3">Provider</th>
                 <th className="px-4 py-3">Rows</th>
                 <th className="px-4 py-3">Created</th>
                 <th className="px-4 py-3">Updated</th>
@@ -46,9 +47,10 @@ export default async function ImportHistoryPage() {
                   <td className="px-4 py-3">{supplierName(item.suppliers)}</td>
                   <td className="px-4 py-3">
                     <Link href={`/admin/import/history/${item.id}`} className="text-lime-300 hover:text-lime-200">
-                      {item.filename}
+                      {item.source_url || item.filename}
                     </Link>
                   </td>
+                  <td className="px-4 py-3">{item.provider || "csv"}</td>
                   <td className="px-4 py-3">{item.row_count}</td>
                   <td className="px-4 py-3">{item.products_created}</td>
                   <td className="px-4 py-3">{item.products_updated}</td>

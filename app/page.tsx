@@ -8,12 +8,12 @@ import { ReviewList } from "@/components/review-list";
 import { SectionHeading } from "@/components/section-heading";
 import { VehicleFinder } from "@/components/vehicle-finder";
 import { builds, brands, featuredReviews } from "@/lib/store";
-import { getStorefrontProducts } from "@/lib/storefront-server";
+import { getPublishedStorefrontProducts } from "@/lib/storefront-server";
 
 const categories = ["Carbon Fiber", "Front Lips", "Diffusers", "Spoilers", "Side Skirts", "Grilles", "Lighting", "Interior", "Wheels", "Suspension"];
 
 export default async function Home() {
-  const liveProducts = await getStorefrontProducts();
+  const liveProducts = await getPublishedStorefrontProducts();
   const bestSellers = liveProducts.filter((product) => product.bestSeller).slice(0, 4);
   const featuredBuild = builds[0];
 

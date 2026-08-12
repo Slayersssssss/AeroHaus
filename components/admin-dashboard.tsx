@@ -16,7 +16,8 @@ export function AdminOverview({ data }: { data: AdminOverviewData }) {
     ? `/admin/orders/${data.highlightedOrder.orderNumber}`
     : "/admin/orders/AH-100310") as Route;
   const quickLinks = [
-    { href: "/admin/import", label: "Open supplier catalog importer" },
+    { href: "/admin/import/alibaba", label: "Supplier Catalog Import" },
+    { href: "/admin/import", label: "CSV / Excel catalog importer" },
     { href: "/admin/products", label: "Manage catalog & supplier data" },
     { href: "/admin/suppliers", label: "Manage suppliers" },
     { href: "/admin/settings/pricing", label: "Pricing engine settings" },

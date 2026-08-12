@@ -2,11 +2,11 @@ import { PageHero } from "@/components/page-hero";
 import { ProductCard } from "@/components/product-card";
 import { Select } from "@/components/ui/select";
 import { brands, filterProductList, vehicleGenerations } from "@/lib/store";
-import { getStorefrontProducts } from "@/lib/storefront-server";
+import { getPublishedStorefrontProducts } from "@/lib/storefront-server";
 
 export default async function ShopPage(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const searchParams = await props.searchParams;
-  const liveProducts = await getStorefrontProducts();
+  const liveProducts = await getPublishedStorefrontProducts();
   const params = {
     brand: typeof searchParams.brand === 'string' ? searchParams.brand : undefined,
     category: typeof searchParams.category === 'string' ? searchParams.category : undefined,
