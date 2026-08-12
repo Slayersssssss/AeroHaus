@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <rect width="1600" height="900" fill="#050505"/>
+  <rect x="24" y="24" width="1552" height="852" rx="0" fill="#0c0c0d" stroke="rgba(255,255,255,0.12)"/>
+  <path d="M0 720L280 560L520 610L840 420L1170 500L1600 250V900H0V720Z" fill="rgba(215,255,57,0.08)"/>
+  <path d="M120 620C280 520 480 470 740 470C930 470 1130 520 1420 650" stroke="rgba(255,255,255,0.24)" stroke-width="3"/>
+  <path d="M240 560H540L640 510H980L1090 560H1360" stroke="rgba(215,255,57,0.58)" stroke-width="8"/>
+  <text x="120" y="180" fill="#D7FF39" font-size="28" font-family="Arial, Helvetica, sans-serif" letter-spacing="10">AEROHAUS</text>
+  <text x="120" y="330" fill="#ffffff" font-size="84" font-weight="800" font-family="Arial, Helvetica, sans-serif">CATALOG MANAGEMENT</text>
+  <text x="120" y="400" fill="#a1a1aa" font-size="28" font-family="Arial, Helvetica, sans-serif">Retail and supplier-side product control</text>
+</svg>
