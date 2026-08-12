@@ -12,7 +12,7 @@ export default async function ImportHistoryDetailPage(props: {
   const supabase = createSupabaseAdminClient();
   const { data: importRun } = await supabase
     .from("catalog_imports")
-    .select("id, filename, created_at, row_count, suppliers(name)")
+    .select("id, filename, created_at, row_count, provider, source_url, pages_fetched, products_found, failed_products, error_message, suppliers(name)")
     .eq("id", id)
     .maybeSingle();
   if (!importRun) notFound();
@@ -31,10 +31,19 @@ export default async function ImportHistoryDetailPage(props: {
       <PageHero
         eyebrow="Import Detail"
         title={importRun.filename}
-        description={`${supplierName} · ${importRun.row_count} rows`}
+        description={`${supplierName} · ${importRun.row_count} rows${importRun.provider ? ` · ${importRun.provider}` : ""}`}
         image="/assets/page-admin-products.svg"
       />
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="mb-6 grid gap-3 border border-white/10 bg-zinc-950/80 p-6 text-sm text-zinc-300 md:grid-cols-3">
+          <div>Provider: {importRun.provider || "csv"}</div>
+          <div>Pages: {importRun.pages_fetched ?? 0}</div>
+          <div>Products found: {importRun.products_found ?? importRun.row_count}</div>
+          <div className="md:col-span-3">Source: {importRun.source_url || importRun.filename}</div>
+          {importRun.error_message ? (
+            <div className="md:col-span-3 text-amber-200">{importRun.error_message}</div>
+          ) : null}
+        </div>
         <div className="overflow-x-auto border border-white/10 bg-zinc-950/80">
           <table className="min-w-full text-left text-sm text-zinc-300">
             <thead className="border-b border-white/10 text-xs uppercase tracking-[0.22em] text-zinc-500">

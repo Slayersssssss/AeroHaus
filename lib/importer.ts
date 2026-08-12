@@ -39,9 +39,19 @@ export type PricingSettings = {
   roundingMode: "nearest-9" | "nearest-99";
 };
 
+export type ImportVariantPreview = {
+  supplierVariantId?: string;
+  supplierSku?: string;
+  optionName: string;
+  optionValue: string;
+  supplierCost?: number;
+  recommendedRetailPrice?: number;
+};
+
 export type NormalizedImportRow = {
   rowIndex: number;
   include: boolean;
+  supplierProductId?: string;
   supplierProductName: string;
   supplierSku: string;
   supplierPrice: number;
@@ -52,6 +62,7 @@ export type NormalizedImportRow = {
   vehicleMake: string;
   vehicleModel: string;
   vehicleChassis: string;
+  additionalChassis: string[];
   startYear: number | null;
   endYear: number | null;
   trim: string;
@@ -68,21 +79,28 @@ export type NormalizedImportRow = {
   grossProfit: number;
   grossMarginPercent: number;
   markupPercent: number;
-  status: "READY" | "REVIEW REQUIRED";
+  status: "READY" | "REVIEW REQUIRED" | "ALREADY IMPORTED";
   issues: string[];
   duplicateStrategy: "skip" | "update" | "create";
   existingProductId?: string;
   existingSupplierProductId?: string;
   fitmentReviewRequired: boolean;
   imageReviewRequired: boolean;
+  variants?: ImportVariantPreview[];
+  catalogImportRowId?: string;
+  alreadyImported?: boolean;
+  costChangeWarning?: string;
+  fetchFailed?: boolean;
 };
 
 const chassisPatterns = [
-  "E90", "E92", "F30", "F32", "F80", "F82", "G20", "G22", "G26", "G30", "G42",
-  "G80", "G82", "G87", "F90", "G90", "W204", "W205", "W206", "W212", "W213",
-  "W214", "C217", "C257", "8V", "8Y", "B8", "B8.5", "B9", "C7", "C8", "981",
-  "982", "991", "992", "9Y", "9YA", "9YB", "95B",
+  "E90", "E92", "F30", "F32", "F80", "F82", "F90", "G20", "G21", "G22", "G23",
+  "G26", "G28", "G30", "G42", "G80", "G82", "G83", "G87", "G90", "W204", "W205",
+  "W206", "W212", "W213", "W214", "C217", "C257", "8V", "8Y", "B8.5", "B8", "B9",
+  "C7", "C8", "981", "982", "991", "992", "9YA", "9YB", "9Y", "95B",
 ] as const;
+
+const chassisPatternsByLength = [...chassisPatterns].sort((a, b) => b.length - a.length);
 
 const makeKeywords = [
   { keyword: "BMW", make: "BMW" },
@@ -98,23 +116,28 @@ function normalizedMakeFromSlug(slug: string) {
   return slug === "mercedes-benz" ? "Mercedes-Benz" : slug.toUpperCase();
 }
 
-const categoryMatchers: Record<string, string> = {
-  diffuser: "Rear Diffusers",
-  spoiler: "Spoilers",
-  lip: "Front Lips",
-  splitter: "Front Lips",
-  skirt: "Side Skirts",
-  grille: "Grilles",
-  grill: "Grilles",
-  bodykit: "Body Kits",
-  body: "Body Kits",
-  hud: "Interior Trim",
-  cover: "Interior Trim",
-  interior: "Interior Trim",
-  mirror: "Mirror Caps",
-  wheel: "Wheels",
-  suspension: "Suspension",
-};
+const categoryMatchers: Array<[string, string]> = [
+  ["front bumper lip", "Front Lips"],
+  ["rear diffuser", "Rear Diffusers"],
+  ["side skirt", "Side Skirts"],
+  ["mirror cap", "Mirror Caps"],
+  ["interior trim", "Interior Trim"],
+  ["body kit", "Body Kits"],
+  ["bodykit", "Body Kits"],
+  ["ducktail", "Spoilers"],
+  ["diffuser", "Rear Diffusers"],
+  ["splitter", "Front Lips"],
+  ["lip", "Front Lips"],
+  ["skirt", "Side Skirts"],
+  ["spoiler", "Spoilers"],
+  ["grille", "Grilles"],
+  ["grill", "Grilles"],
+  ["mirror", "Mirror Caps"],
+  ["wheel", "Wheels"],
+  ["suspension", "Suspension"],
+  ["interior", "Interior Trim"],
+  ["hud", "Interior Trim"],
+];
 
 const materialMatchers: Record<string, string> = {
   carbon: "Carbon Fiber",
@@ -155,12 +178,44 @@ function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export function detectChassis(value: string) {
+export function detectAllChassis(value: string) {
   const normalized = value.toUpperCase();
+  return chassisPatternsByLength.filter((pattern) =>
+    new RegExp(`\\b${pattern.replace(".", "\\.")}\\b`, "i").test(normalized)
+  );
+}
+
+export function detectChassis(value: string) {
+  return detectAllChassis(value)[0] ?? "";
+}
+
+export function detectTrimPackage(value: string) {
+  const upper = value.toUpperCase();
+  if (/\bM\s*SPORT\b/.test(upper)) return "M Sport";
+  if (/\bAMG\s*LINE\b/.test(upper)) return "AMG Line";
+  if (/\bS\s*LINE\b/.test(upper)) return "S Line";
+  if (/\bPRE[-\s]?LCI\b/.test(upper)) return "Pre-LCI";
+  if (/\bLCI\b/.test(upper)) return "LCI";
+  return "";
+}
+
+function generationMatchesChassis(
+  generation: (typeof vehicleGenerations)[number],
+  chassis: string,
+  detectedMake: string
+) {
+  if (
+    detectedMake &&
+    normalizedMakeFromSlug(generation.makeSlug).toUpperCase() !== detectedMake.toUpperCase()
+  ) {
+    return false;
+  }
+
+  const chassisUpper = chassis.toUpperCase();
   return (
-    chassisPatterns.find((pattern) =>
-      new RegExp(`\\b${pattern.replace(".", "\\.")}\\b`, "i").test(normalized)
-    ) ?? ""
+    generation.slug.toUpperCase() === chassisUpper ||
+    generation.chassisLabel.toUpperCase() === chassisUpper ||
+    generation.name.toUpperCase().includes(chassisUpper)
   );
 }
 
@@ -171,33 +226,39 @@ export function detectVehicleFromText(value: string) {
       make: "",
       model: "",
       chassis: "",
+      additionalChassis: [] as string[],
+      years: [] as number[],
+      generationSlug: "",
       fitmentReviewRequired: true,
     };
   }
 
   const detectedMake =
     makeKeywords.find(({ keyword }) => upper.includes(keyword))?.make ?? "";
-  const chassis = detectChassis(upper);
-  const matchedGeneration = chassis
-    ? vehicleGenerations.find(
-        (generation) =>
-          (!detectedMake ||
-            normalizedMakeFromSlug(generation.makeSlug).toUpperCase() ===
-              detectedMake.toUpperCase()) &&
-          (generation.slug.toUpperCase() === chassis.toUpperCase() ||
-            generation.chassisLabel.toUpperCase() === chassis.toUpperCase() ||
-            generation.name.toUpperCase().includes(chassis))
+  const allChassis = detectAllChassis(upper);
+  const matchedGeneration = allChassis
+    .map((chassis) =>
+      vehicleGenerations.find((generation) =>
+        generationMatchesChassis(generation, chassis, detectedMake)
       )
-    : undefined;
+    )
+    .find(Boolean);
 
   if (!matchedGeneration) {
     return {
       make: detectedMake,
       model: "",
-      chassis,
-      fitmentReviewRequired: Boolean(chassis || detectedMake),
+      chassis: allChassis[0] ?? "",
+      additionalChassis: allChassis.slice(1),
+      years: [] as number[],
+      generationSlug: "",
+      fitmentReviewRequired: Boolean(allChassis[0] || detectedMake),
     };
   }
+
+  const unmatchedChassis = allChassis.filter(
+    (chassis) => !generationMatchesChassis(matchedGeneration, chassis, detectedMake)
+  );
 
   return {
     make:
@@ -206,14 +267,23 @@ export function detectVehicleFromText(value: string) {
         : matchedGeneration.makeSlug.toUpperCase(),
     model: matchedGeneration.modelName,
     chassis: matchedGeneration.chassisLabel,
-    fitmentReviewRequired: false,
+    additionalChassis: unmatchedChassis,
+    years: matchedGeneration.years,
+    generationSlug: matchedGeneration.slug,
+    fitmentReviewRequired: unmatchedChassis.length > 0,
   };
 }
 
 function inferCategory(value: string) {
   const lower = value.toLowerCase();
-  const match = Object.entries(categoryMatchers).find(([needle]) => lower.includes(needle));
+  const match = categoryMatchers.find(([needle]) => lower.includes(needle));
   return match?.[1] ?? "";
+}
+
+function singularCategory(value: string) {
+  if (value.endsWith("ies")) return `${value.slice(0, -3)}y`;
+  if (value.endsWith("s")) return value.slice(0, -1);
+  return value;
 }
 
 function inferMaterial(value: string) {
@@ -277,25 +347,33 @@ export function suggestProductTitle(input: {
   vehicleChassis: string;
   material: string;
   category: string;
+  additionalChassis?: string[];
 }) {
-  // This is the current deterministic normalization layer.
-  // An AI-assisted cleanup provider can be added later to improve the string output
-  // without changing pricing, fitment, years, chassis, or SKU automatically.
+  // Deterministic suggestion only. Never invent fitment, years, or SKUs.
+  const chassis = Array.from(
+    new Set(
+      [input.vehicleChassis, ...(input.additionalChassis ?? [])]
+        .map((item) => item.trim())
+        .filter(Boolean)
+    )
+  );
+  const trimPackage = detectTrimPackage(input.supplierProductName);
   const pieces = [
     input.vehicleMake,
-    input.vehicleModel,
-    input.vehicleChassis,
+    chassis.join(" / "),
+    trimPackage,
     input.material,
-    input.category.replace(/s$/, ""),
+    singularCategory(input.category || "Part"),
   ].filter(Boolean);
 
-  if (pieces.length > 0) {
+  if (pieces.length > 1) {
     return pieces.join(" ").replace(/\s+/g, " ").trim();
   }
 
   return input.supplierProductName
     .replace(/\bfor\b/gi, "")
     .replace(/\bup\b/gi, "")
+    .replace(/\b(19|20)\d{2}\b/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -320,14 +398,30 @@ export function normalizeSupplierRow(
   const vehicleModelInput = normalizeText(mappedRow["Vehicle Model"]);
   const chassisInput = normalizeText(mappedRow["Vehicle Chassis"]);
   const detected = detectVehicleFromText(
-    [supplierProductName, vehicleMakeInput, vehicleModelInput, chassisInput].join(" ")
+    [
+      supplierProductName,
+      vehicleMakeInput,
+      vehicleModelInput,
+      chassisInput,
+      normalizeText(mappedRow["Supplier Notes"]),
+    ].join(" ")
   );
   const vehicleMake = vehicleMakeInput || detected.make;
   const vehicleModel = vehicleModelInput || detected.model;
   const vehicleChassis = chassisInput || detected.chassis;
-  const startYear = Number(mappedRow["Start Year"]) || null;
-  const endYear = Number(mappedRow["End Year"]) || null;
-  const trim = normalizeText(mappedRow["Trim"]);
+  const additionalChassis = detected.additionalChassis.filter(
+    (chassis) => chassis.toUpperCase() !== vehicleChassis.toUpperCase()
+  );
+  const yearsInTitle = [...supplierProductName.matchAll(/\b((?:19|20)\d{2})\b/g)].map((match) =>
+    Number(match[1])
+  );
+  const startYear =
+    Number(mappedRow["Start Year"]) ||
+    (yearsInTitle.length ? Math.min(...yearsInTitle) : detected.years[0] ?? null);
+  const endYear =
+    Number(mappedRow["End Year"]) ||
+    (yearsInTitle.length ? Math.max(...yearsInTitle) : detected.years.at(-1) ?? null);
+  const trim = normalizeText(mappedRow["Trim"]) || detectTrimPackage(supplierProductName);
   const category = normalizeText(mappedRow["Category"]) || inferCategory(supplierProductName);
   const material = normalizeText(mappedRow["Material"]) || inferMaterial(supplierProductName);
   const finish = normalizeText(mappedRow["Finish"]) || inferFinish(supplierProductName);
@@ -342,6 +436,7 @@ export function normalizeSupplierRow(
     vehicleMake,
     vehicleModel,
     vehicleChassis,
+    additionalChassis,
     material: material || "Carbon Fiber",
     category: category || "Part",
   });
@@ -355,7 +450,9 @@ export function normalizeSupplierRow(
   if (startYear && endYear && startYear > endYear) issues.push("Invalid Year Range");
   if (pricing.grossMarginPercent < settings.minimumGrossMargin) issues.push("Low Margin");
   if (pricing.grossMarginPercent < 0) issues.push("Negative Margin");
-  if (detected.fitmentReviewRequired || !vehicleChassis) issues.push("Fitment Review Required");
+  if (detected.fitmentReviewRequired || !vehicleChassis || !detected.generationSlug) {
+    issues.push("FITMENT REVIEW REQUIRED");
+  }
 
   return {
     rowIndex,
@@ -370,6 +467,7 @@ export function normalizeSupplierRow(
     vehicleMake,
     vehicleModel,
     vehicleChassis,
+    additionalChassis,
     startYear,
     endYear,
     trim,
@@ -388,8 +486,8 @@ export function normalizeSupplierRow(
     markupPercent: pricing.markupPercent,
     status: issues.length > 0 ? "REVIEW REQUIRED" : "READY",
     issues,
-    duplicateStrategy: "skip",
-    fitmentReviewRequired: issues.includes("Fitment Review Required"),
+    duplicateStrategy: "create",
+    fitmentReviewRequired: issues.includes("FITMENT REVIEW REQUIRED"),
     imageReviewRequired: issues.includes("Missing Product Image"),
   };
 }

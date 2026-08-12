@@ -221,29 +221,37 @@ async function fetchLiveProducts(): Promise<Product[]> {
   );
 }
 
+function isPublicCatalogProduct(product: Product) {
+  return product.status !== "Draft" && product.status !== "Archived";
+}
+
 export async function getStorefrontProducts() {
   return fetchLiveProducts();
 }
 
+export async function getPublishedStorefrontProducts() {
+  return (await fetchLiveProducts()).filter(isPublicCatalogProduct);
+}
+
 export async function getStorefrontProductBySlug(slug: string) {
-  const items = await fetchLiveProducts();
+  const items = await getPublishedStorefrontProducts();
   return items.find((item) => item.slug === slug);
 }
 
 export async function getStorefrontProductsForBrand(brandSlug: Product["brandSlug"]) {
-  const items = await fetchLiveProducts();
+  const items = await getPublishedStorefrontProducts();
   return items.filter((item) => item.brandSlug === brandSlug);
 }
 
 export async function getStorefrontProductsForGeneration(generationSlug: string) {
-  const items = await fetchLiveProducts();
+  const items = await getPublishedStorefrontProducts();
   return items.filter((item) =>
     item.fitments.some((fitment) => fitment.generationSlug === generationSlug)
   );
 }
 
 export async function getStorefrontRelatedProducts(product: Product) {
-  const items = await fetchLiveProducts();
+  const items = await getPublishedStorefrontProducts();
   return items.filter((item) => product.relatedSlugs.includes(item.slug));
 }
 

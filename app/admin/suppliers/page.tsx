@@ -53,6 +53,7 @@ export default async function SuppliersPage() {
               <label className="grid gap-2 text-sm text-zinc-300 md:col-span-2">Notes<textarea name="notes" defaultValue={supplier.notes ?? ""} className="min-h-28 border border-white/10 bg-black/30 px-3 py-3 text-white" /></label>
               <div className="flex flex-wrap gap-3 md:col-span-2">
                 <Button type="submit">Save Supplier</Button>
+                <Link href="/admin/import/alibaba" className="inline-flex items-center border border-white/10 px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] text-zinc-300">Import Catalog URL</Link>
                 <Link href="/admin/import" className="inline-flex items-center border border-white/10 px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] text-zinc-300">View Imported Catalogs</Link>
               </div>
             </form>
