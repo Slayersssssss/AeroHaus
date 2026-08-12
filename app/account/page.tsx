@@ -14,6 +14,16 @@ export default async function AccountPage() {
       <PageHero eyebrow="Account" title="My Garage & Orders" description="Profile, order history, tracking, saved vehicles, wishlist, addresses, support requests and returns all route through this account surface." image="/assets/page-account.svg" />
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         {!auth.user ? <div className="mb-8 border border-white/10 bg-zinc-950/80 p-6 text-sm text-zinc-400"><div>Sign in with Supabase Auth to persist orders, addresses, returns, support requests and wishlist data. The local garage and cart still work for guest browsing.</div><div className="mt-4"><Link href="/auth/sign-in"><Button>Sign In</Button></Link></div></div> : null}
+        {auth.user && auth.profile?.role === "admin" ? (
+          <section className="mb-8 border border-lime-300/20 bg-lime-300/10 p-6">
+            <p className="text-xs uppercase tracking-[0.28em] text-lime-300">Admin Access</p>
+            <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.12em] text-white">You are signed in as an admin</h2>
+            <p className="mt-3 text-sm leading-7 text-zinc-300">Use the admin dashboard for product management, orders, supplier workflow, and store analytics.</p>
+            <div className="mt-4">
+              <Link href="/admin"><Button>Open Admin Dashboard</Button></Link>
+            </div>
+          </section>
+        ) : null}
         {auth.user ? (
           <section className="mb-8 border border-white/10 bg-zinc-950/80 p-6">
             <p className="text-xs uppercase tracking-[0.28em] text-lime-300">Order History</p>
