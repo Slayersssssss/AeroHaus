@@ -1,5 +1,7 @@
 import { AccountDashboard } from "@/components/account-dashboard";
 import { PageHero } from "@/components/page-hero";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { getAuthContext } from "@/lib/supabase/auth";
 import { getAccountOrders } from "@/lib/storefront-server";
 import { formatCurrency } from "@/lib/utils";
@@ -11,7 +13,7 @@ export default async function AccountPage() {
     <div>
       <PageHero eyebrow="Account" title="My Garage & Orders" description="Profile, order history, tracking, saved vehicles, wishlist, addresses, support requests and returns all route through this account surface." image="/assets/page-account.svg" />
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        {!auth.user ? <div className="mb-8 border border-white/10 bg-zinc-950/80 p-6 text-sm text-zinc-400">Sign in with Supabase Auth to persist orders, addresses, returns, support requests and wishlist data. The local garage and cart still work for guest browsing.</div> : null}
+        {!auth.user ? <div className="mb-8 border border-white/10 bg-zinc-950/80 p-6 text-sm text-zinc-400"><div>Sign in with Supabase Auth to persist orders, addresses, returns, support requests and wishlist data. The local garage and cart still work for guest browsing.</div><div className="mt-4"><Link href="/auth/sign-in"><Button>Sign In</Button></Link></div></div> : null}
         {auth.user ? (
           <section className="mb-8 border border-white/10 bg-zinc-950/80 p-6">
             <p className="text-xs uppercase tracking-[0.28em] text-lime-300">Order History</p>
