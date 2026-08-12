@@ -2,16 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingBag, Star } from "lucide-react";
+import { CheckCircle2, Heart, ShoppingBag, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useStorefront } from "@/components/providers";
+import { evaluateFitment } from "@/lib/store";
 import { formatCurrency } from "@/lib/utils";
 import type { Product } from "@/lib/types";
 
 export function ProductCard({ product }: { product: Product }) {
-  const { addToCart, toggleWishlist, isWishlisted } = useStorefront();
+  const { addToCart, toggleWishlist, isWishlisted, selectedVehicle } = useStorefront();
   const defaultVariant = product.variants[0];
+  const fitment = evaluateFitment(product, selectedVehicle?.key);
 
   return (
     <article className="group flex h-full flex-col border border-white/10 bg-zinc-950/80 transition hover:border-white/20 hover:bg-zinc-950">
@@ -23,6 +25,11 @@ export function ProductCard({ product }: { product: Product }) {
         </button>
       </Link>
       <div className="flex flex-1 flex-col p-5">
+        {fitment === "exact" ? (
+          <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
+            <CheckCircle2 className="h-4 w-4" /> Fits Your Vehicle
+          </div>
+        ) : null}
         <p className="text-xs uppercase tracking-[0.26em] text-zinc-500">{product.compatibilitySummary}</p>
         <Link href={`/products/${product.slug}`} className="mt-3 text-lg font-semibold text-white transition group-hover:text-lime-300">{product.title}</Link>
         <div className="mt-4 flex items-center gap-2 text-sm text-zinc-400"><div className="flex items-center gap-1 text-lime-300"><Star className="h-4 w-4 fill-current" /><span>{product.rating.toFixed(1)}</span></div><span>({product.reviewCount})</span></div>
