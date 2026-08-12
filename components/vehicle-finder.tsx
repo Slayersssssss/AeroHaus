@@ -89,15 +89,16 @@ export function VehicleFinder() {
   );
 
   const exactVehicle = useMemo(
-    () =>
-      matchingByGeneration.find((vehicle) => (!trim ? true : vehicle.trim === trim)),
+    () => (trim ? matchingByGeneration.find((vehicle) => vehicle.trim === trim) : undefined),
     [matchingByGeneration, trim]
   );
 
   const selectVehicle = () => {
     if (!exactVehicle) return;
     setSelectedVehicle(exactVehicle.key);
-    router.push(`/${exactVehicle.makeSlug}/${exactVehicle.generationSlug}`);
+    router.push(
+      `/${exactVehicle.makeSlug}/${exactVehicle.generationSlug}?year=${exactVehicle.year}&trim=${encodeURIComponent(exactVehicle.trim)}`
+    );
   };
 
   return (
@@ -114,7 +115,7 @@ export function VehicleFinder() {
         <Select value={makeSlug} onChange={(event) => { setMakeSlug(event.target.value); setModelSlug(""); setGenerationSlug(""); setTrim(""); }}><option value="">Make</option>{availableMakes.map((brand) => <option key={brand.slug} value={brand.slug}>{brand.name}</option>)}</Select>
         <Select value={modelSlug} onChange={(event) => { setModelSlug(event.target.value); setGenerationSlug(""); setTrim(""); }} disabled={!makeSlug}><option value="">Model</option>{availableModels.map((model) => <option key={model.slug} value={model.slug}>{model.name}</option>)}</Select>
         <Select value={generationSlug} onChange={(event) => { setGenerationSlug(event.target.value); setTrim(""); }} disabled={!modelSlug}><option value="">Chassis / Generation</option>{availableGenerations.map((generation) => <option key={generation.slug} value={generation.slug}>{generation.name}</option>)}</Select>
-        <Select value={trim} onChange={(event) => setTrim(event.target.value)} disabled={!generationSlug}><option value="">Trim</option>{availableTrims.map((option) => <option key={option} value={option}>{option}</option>)}</Select>
+        <Select value={trim} onChange={(event) => setTrim(event.target.value)} disabled={!generationSlug}><option value="">Trim / Package</option>{availableTrims.map((option) => <option key={option} value={option}>{option}</option>)}</Select>
         <Button className="w-full" onClick={selectVehicle} disabled={!exactVehicle}><ChevronsRight className="h-4 w-4" /> View Compatible Parts</Button>
       </div>
       {exactVehicle ? (

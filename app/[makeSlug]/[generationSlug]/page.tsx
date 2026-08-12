@@ -4,7 +4,7 @@ import { CollectionGarageBar } from "@/components/collection-garage-bar";
 import { CollectionHero } from "@/components/collection-hero";
 import { CollectionToolbar } from "@/components/collection-toolbar";
 import { ProductCard } from "@/components/product-card";
-import { getBrandBySlug, getGenerationBySlug } from "@/lib/store";
+import { getBrandBySlug, getGenerationBySlug, trimMatches } from "@/lib/store";
 import { getStorefrontProductsForGeneration } from "@/lib/storefront-server";
 
 function filterCollectionProducts(
@@ -29,7 +29,12 @@ function filterCollectionProducts(
       )
     )
       return false;
-    if (filters.trim && !product.fitments.some((fitment) => fitment.trims.includes(filters.trim!)))
+    if (
+      filters.trim &&
+      !product.fitments.some((fitment) =>
+        fitment.trims.some((trim) => trimMatches(filters.trim!, trim))
+      )
+    )
       return false;
     if (filters.price) {
       if (filters.price === "0-500" && product.price >= 500) return false;

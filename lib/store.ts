@@ -31,11 +31,42 @@ export function getProductsForGeneration(generationSlug: string) {
   return products.filter((product) => product.fitments.some((fitment) => fitment.generationSlug === generationSlug));
 }
 
+function normalizeTrimLabel(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+export function trimMatches(vehicleTrim: string, fitmentTrim: string) {
+  const vehicle = normalizeTrimLabel(vehicleTrim);
+  const fitment = normalizeTrimLabel(fitmentTrim);
+  return vehicle === fitment || vehicle.includes(fitment) || fitment.includes(vehicle);
+}
+
+function packageKeywordMatches(vehicleTrim: string, requirement: string) {
+  const vehicle = normalizeTrimLabel(vehicleTrim);
+  const required = normalizeTrimLabel(requirement);
+  if (required.includes("m sport")) return vehicle.includes("m sport");
+  if (required.includes("base")) return vehicle.includes("base") || vehicle.includes("standard");
+  if (required.includes("amg")) return vehicle.includes("amg");
+  if (required.includes("s line")) return vehicle.includes("s line");
+  return vehicle.includes(required);
+}
+
 export function evaluateFitment(product: Product, vehicleKey?: string | null): FitmentResult {
   const vehicle = getVehicleRecordByKey(vehicleKey);
   if (!vehicle) return "none";
-  const match = product.fitments.find((fitment) => fitment.generationSlug === vehicle.generationSlug && vehicle.year >= fitment.yearStart && vehicle.year <= fitment.yearEnd && fitment.trims.includes(vehicle.trim));
+  const match = product.fitments.find((fitment) => fitment.generationSlug === vehicle.generationSlug && vehicle.year >= fitment.yearStart && vehicle.year <= fitment.yearEnd && fitment.trims.some((trim) => trimMatches(vehicle.trim, trim)));
   if (!match) return "none";
+
+  const excluded = (match.exclusions ?? []).some((exclusion) =>
+    packageKeywordMatches(vehicle.trim, exclusion)
+  );
+  if (excluded) return "none";
+
+  const missingRequirement = (match.requires ?? []).some(
+    (requirement) => !packageKeywordMatches(vehicle.trim, requirement)
+  );
+  if (missingRequirement) return "partial";
+
   return match.exact ? "exact" : "partial";
 }
 

@@ -71,7 +71,7 @@ export const vehicleGenerations: VehicleGeneration[] = [
     name: "G20 / G21",
     chassisLabel: "G20",
     years: range(2019, 2026),
-    trims: ["330i", "330e", "M340i"],
+    trims: ["330i Base", "330i M Sport", "330e M Sport", "M340i"],
     notes: "Sedan and touring chassis. LCI fitment restrictions vary by product.",
   },
   {
@@ -112,7 +112,7 @@ export const vehicleGenerations: VehicleGeneration[] = [
     name: "W206",
     chassisLabel: "W206",
     years: range(2022, 2026),
-    trims: ["C300", "C43 AMG", "C63 S E Performance"],
+    trims: ["C300 Standard", "C300 AMG Line", "C43 AMG", "C63 S E Performance"],
   },
   {
     slug: "w118-cla",
@@ -132,7 +132,7 @@ export const vehicleGenerations: VehicleGeneration[] = [
     name: "B8.5",
     chassisLabel: "B8.5",
     years: range(2013, 2016),
-    trims: ["A4", "S4", "A5", "S5"],
+    trims: ["A4 Standard", "A4 S Line", "S4", "A5 S Line", "S5"],
   },
   {
     slug: "b9",
@@ -142,7 +142,7 @@ export const vehicleGenerations: VehicleGeneration[] = [
     name: "B9",
     chassisLabel: "B9",
     years: range(2017, 2025),
-    trims: ["A4", "S4", "RS4"],
+    trims: ["A4 Standard", "A4 S Line", "S4", "RS4"],
   },
   {
     slug: "8y-rs3",
@@ -183,7 +183,7 @@ export const vehicleGenerations: VehicleGeneration[] = [
     name: "9YA / 9YB",
     chassisLabel: "9Y",
     years: range(2019, 2026),
-    trims: ["Cayenne", "Cayenne S", "Cayenne Coupe", "Cayenne GT"],
+    trims: ["Cayenne Standard", "Cayenne S", "Cayenne Coupe", "Cayenne GT"],
   },
   {
     slug: "95b-macan",
@@ -193,7 +193,7 @@ export const vehicleGenerations: VehicleGeneration[] = [
     name: "95B",
     chassisLabel: "95B",
     years: range(2015, 2021),
-    trims: ["Macan", "Macan S", "Macan GTS", "Macan Turbo"],
+    trims: ["Macan Standard", "Macan S", "Macan GTS", "Macan Turbo"],
   },
 ];
 
