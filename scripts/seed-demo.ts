@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { env } from "@/lib/env";
+import { defaultPricingSettings } from "@/lib/importer";
 import { builds, brands, products, vehicleGenerations } from "@/lib/store";
 import { supplierRecords } from "@/lib/private-data";
 
@@ -174,20 +175,49 @@ async function main() {
   await supabase
     .from('suppliers')
     .upsert(
-      Array.from(
-        new Map(
-          supplierRecords.map((record) => [
-            record.supplierName,
-            {
-              name: record.supplierName,
-              country: record.supplierCountry,
-              contact_email: record.supplierContact,
-            },
-          ])
-        ).values()
-      ),
+      [
+        ...Array.from(
+          new Map(
+            supplierRecords.map((record) => [
+              record.supplierName,
+              {
+                name: record.supplierName,
+                country: record.supplierCountry,
+                contact_email: record.supplierContact,
+              },
+            ])
+          ).values()
+        ),
+        {
+          name: 'Guangzhou Carbon Factory',
+          country: 'China',
+          contact_name: 'Lina Chen',
+          contact_email: 'sales@guangzhoucarbon.example',
+          phone: '+86-20-5555-0199',
+          whatsapp: '+86-13800000000',
+          website: 'https://guangzhoucarbon.example',
+          alibaba_store_url: 'https://supplier.example/guangzhou-carbon-factory',
+          currency: 'USD',
+          default_processing_days: 5,
+          notes: 'Sample supplier for importer workflow demonstrations.',
+        },
+      ],
       { onConflict: 'name' }
     );
+
+  const { data: existingPricingSetting } = await supabase
+    .from('pricing_settings')
+    .select('id')
+    .eq('name', 'Default Pricing Rules')
+    .maybeSingle();
+
+  await supabase.from('pricing_settings').upsert({
+    id: existingPricingSetting?.id,
+    name: 'Default Pricing Rules',
+    rules: defaultPricingSettings.rules,
+    minimum_gross_margin: defaultPricingSettings.minimumGrossMargin,
+    rounding_mode: defaultPricingSettings.roundingMode,
+  });
 
   const { data: suppliers } = await supabase.from('suppliers').select('id, name');
   const supplierIdByName = new Map((suppliers ?? []).map((row) => [row.name, row.id]));
