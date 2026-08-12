@@ -84,6 +84,20 @@ const chassisPatterns = [
   "982", "991", "992", "9Y", "9YA", "9YB", "95B",
 ] as const;
 
+const makeKeywords = [
+  { keyword: "BMW", make: "BMW" },
+  { keyword: "MERCEDES", make: "Mercedes-Benz" },
+  { keyword: "AMG", make: "Mercedes-Benz" },
+  { keyword: "AUDI", make: "Audi" },
+  { keyword: "PORSCHE", make: "Porsche" },
+] as const;
+
+const blockedMakeKeywords = ["TESLA", "MCLAREN", "FERRARI", "LOTUS", "LAMBORGHINI"];
+
+function normalizedMakeFromSlug(slug: string) {
+  return slug === "mercedes-benz" ? "Mercedes-Benz" : slug.toUpperCase();
+}
+
 const categoryMatchers: Record<string, string> = {
   diffuser: "Rear Diffusers",
   spoiler: "Spoilers",
@@ -94,6 +108,9 @@ const categoryMatchers: Record<string, string> = {
   grill: "Grilles",
   bodykit: "Body Kits",
   body: "Body Kits",
+  hud: "Interior Trim",
+  cover: "Interior Trim",
+  interior: "Interior Trim",
   mirror: "Mirror Caps",
   wheel: "Wheels",
   suspension: "Suspension",
@@ -140,30 +157,53 @@ function normalizeText(value: unknown) {
 
 export function detectChassis(value: string) {
   const normalized = value.toUpperCase();
-  return chassisPatterns.find((pattern) => normalized.includes(pattern)) ?? "";
+  return (
+    chassisPatterns.find((pattern) =>
+      new RegExp(`\\b${pattern.replace(".", "\\.")}\\b`, "i").test(normalized)
+    ) ?? ""
+  );
 }
 
 export function detectVehicleFromText(value: string) {
   const upper = value.toUpperCase();
-  const chassis = detectChassis(upper);
-  const matchedGeneration = vehicleGenerations.find(
-    (generation) =>
-      generation.slug.toUpperCase() === chassis.toUpperCase() ||
-      generation.chassisLabel.toUpperCase() === chassis.toUpperCase() ||
-      generation.name.toUpperCase().includes(chassis)
-  );
-
-  if (!matchedGeneration) {
+  if (blockedMakeKeywords.some((keyword) => upper.includes(keyword))) {
     return {
       make: "",
       model: "",
+      chassis: "",
+      fitmentReviewRequired: true,
+    };
+  }
+
+  const detectedMake =
+    makeKeywords.find(({ keyword }) => upper.includes(keyword))?.make ?? "";
+  const chassis = detectChassis(upper);
+  const matchedGeneration = chassis
+    ? vehicleGenerations.find(
+        (generation) =>
+          (!detectedMake ||
+            normalizedMakeFromSlug(generation.makeSlug).toUpperCase() ===
+              detectedMake.toUpperCase()) &&
+          (generation.slug.toUpperCase() === chassis.toUpperCase() ||
+            generation.chassisLabel.toUpperCase() === chassis.toUpperCase() ||
+            generation.name.toUpperCase().includes(chassis))
+      )
+    : undefined;
+
+  if (!matchedGeneration) {
+    return {
+      make: detectedMake,
+      model: "",
       chassis,
-      fitmentReviewRequired: Boolean(chassis),
+      fitmentReviewRequired: Boolean(chassis || detectedMake),
     };
   }
 
   return {
-    make: matchedGeneration.makeSlug === "mercedes-benz" ? "Mercedes-Benz" : matchedGeneration.makeSlug.toUpperCase(),
+    make:
+      matchedGeneration.makeSlug === "mercedes-benz"
+        ? "Mercedes-Benz"
+        : matchedGeneration.makeSlug.toUpperCase(),
     model: matchedGeneration.modelName,
     chassis: matchedGeneration.chassisLabel,
     fitmentReviewRequired: false,
