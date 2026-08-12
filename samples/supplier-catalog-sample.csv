@@ -1,0 +1,11 @@
+product_name,sku,supplier_cost,supplier_shipping,image_url,make,model,chassis,start_year,end_year,trim,category,material,finish,description,moq,processing_time,notes
+G20 MP style front lip carbon 19-22,GCF-BMW-G20-FLIP-01,120,55,https://example.com/images/g20-front-lip.jpg,BMW,3 Series,G20,2019,2022,M340i,Front Lips,Carbon Fiber,Gloss,G20 carbon front lip,1,5 days,Demo supplier note
+G80 rear spoiler dry carbon 2021 up,GCF-BMW-G80-SPLR-02,145,48,https://example.com/images/g80-spoiler.jpg,BMW,M3,G80,2021,2026,M3 Competition,Spoilers,Dry Carbon Fiber,Gloss,G80 rear spoiler,1,6 days,Demo supplier note
+W206 trunk spoiler carbon,GCF-MB-W206-SPLR-03,82,24,https://example.com/images/w206-spoiler.jpg,Mercedes-Benz,C-Class,W206,2022,2026,C300,Spoilers,Carbon Fiber,Gloss,W206 trunk spoiler,2,4 days,Demo supplier note
+CLA45S bodykit dry carbon W118,GCF-MB-W118-BKIT-04,640,165,https://example.com/images/w118-bodykit.jpg,Mercedes-Benz,CLA,W118,2020,2026,CLA45 AMG,Body Kits,Dry Carbon Fiber,Gloss,CLA45S body kit,1,8 days,Review bumper profile
+B9 RS style front lip,GCF-AUDI-B9-FLIP-05,112,38,https://example.com/images/b9-front-lip.jpg,Audi,A4 / S4 / RS4,B9,2017,2025,S4,Front Lips,Carbon Fiber,Gloss,B9 RS style front lip,1,5 days,Demo supplier note
+8Y sedan spoiler forged carbon,GCF-AUDI-8Y-SPLR-06,98,32,https://example.com/images/8y-spoiler.jpg,Audi,RS3,8Y,2022,2026,RS3 Sedan,Spoilers,Forged Carbon,Gloss,8Y forged spoiler,1,5 days,Demo supplier note
+718 rear diffuser carbon 2017-18,GCF-POR-982-RDIF-07,338,96,https://example.com/images/718-diffuser.jpg,Porsche,718 Cayman / Boxster,982,2017,2018,Cayman,Rear Diffusers,Carbon Fiber,Gloss,718 rear diffuser,1,7 days,Confirm bumper year
+992 front lip real carbon,GCF-POR-992-FLIP-08,392,112,https://example.com/images/992-front-lip.jpg,Porsche,911,992,2020,2026,Carrera,Front Lips,Real Carbon Fiber,Gloss,992 front lip,1,7 days,Demo supplier note
+9Y rear spoiler carbon look,GCF-POR-9Y-SPLR-09,118,42,https://example.com/images/9y-spoiler.jpg,Porsche,Cayenne,9Y,2019,2026,Cayenne Coupe,Spoilers,ABS Carbon Fiber Look,Gloss,Cayenne rear spoiler,1,5 days,Confirm roofline
+Macan HM wide body kit,GCF-POR-95B-BKIT-10,988,236,https://example.com/images/macan-bodykit.jpg,Porsche,Macan,95B,2015,2021,Macan GTS,Body Kits,Composite / Carbon Fiber Mix,Unpainted,Macan wide body kit,1,10 days,Requires fitment review

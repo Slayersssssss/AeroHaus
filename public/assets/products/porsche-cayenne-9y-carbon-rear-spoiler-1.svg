@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <rect width="1600" height="900" fill="#050505"/>
+  <rect x="24" y="24" width="1552" height="852" fill="#0c0c0d" stroke="rgba(255,255,255,0.12)"/>
+  <path d="M0 740L310 560L570 620L840 450L1160 520L1600 290V900H0V740Z" fill="rgba(215,255,57,0.08)"/>
+  <path d="M150 600C370 500 600 470 820 470C1010 470 1190 520 1420 650" stroke="rgba(255,255,255,0.24)" stroke-width="3"/>
+  <path d="M250 560H530L650 510H970L1090 560H1350" stroke="rgba(215,255,57,0.6)" stroke-width="8"/>
+  <text x="120" y="180" fill="#D7FF39" font-size="28" font-family="Arial, Helvetica, sans-serif" letter-spacing="10">AEROHAUS</text>
+  <text x="120" y="330" fill="#ffffff" font-size="74" font-weight="800" font-family="Arial, Helvetica, sans-serif">PORSCHE CAYENNE 9Y CARBON REAR SPOILER</text>
+  <text x="120" y="400" fill="#a1a1aa" font-size="28" font-family="Arial, Helvetica, sans-serif">Porsche Collection Visual 1</text>
+</svg>
