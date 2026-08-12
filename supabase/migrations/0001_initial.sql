@@ -12,10 +12,6 @@ begin
 end;
 $$;
 
-create or replace function public.is_admin(user_id uuid) returns boolean language sql stable as $$
-  select exists(select 1 from public.profiles where id = user_id and role = 'admin');
-$$;
-
 create table if not exists public.users (
   id uuid primary key default gen_random_uuid(),
   email text unique,
@@ -32,6 +28,10 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+create or replace function public.is_admin(user_id uuid) returns boolean language sql stable as $$
+  select exists(select 1 from public.profiles where id = user_id and role = 'admin');
+$$;
 
 create table if not exists public.addresses (
   id uuid primary key default gen_random_uuid(),
